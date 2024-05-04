@@ -10,6 +10,7 @@ from users.models import User
 from users.permissions import IsOwner, IsModerator
 from users.serializers import UserSerializer
 from users.tasks import send_mail_notification, send_mail_confirmation
+from rest_framework.exceptions import APIException
 
 
 # Create your views here.
@@ -49,6 +50,13 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+class ConfirmationCodeAlreadyUsedException(APIException):
+    """ Код подтверждения уже использован """
+    status_code = 400
+    default_detail = 'Код подтверждения уже использован'
+    default_code = 'invalid'
+
+
 class RegistrationConfirmationView(APIView):
     """ Подтверждение регистрации """
     def post(self, request):
@@ -58,11 +66,13 @@ class RegistrationConfirmationView(APIView):
         try:
             user = User.objects.get(email=email)
             if user.confirmation_code == confirmation_code:
+                if user.is_active:
+                    raise ConfirmationCodeAlreadyUsedException
                 user.is_active = True
                 user.save()
                 send_mail_notification.delay(user.email)
                 return Response({'message': 'Регистрация успешно подтверждена'}, status=status.HTTP_200_OK)
             else:
-                return Response({'error': 'Неверный код подтверждения'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Неверный код подтверждения'}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
-            return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
