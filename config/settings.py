@@ -137,6 +137,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
 
+SITE_URL = os.getenv('SITE_URL')
+
 ROOT_EMAIL = os.getenv('ROOT_EMAIL')
 ROOT_PASSWORD = os.getenv('ROOT_PASSWORD')
 
