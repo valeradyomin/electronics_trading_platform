@@ -194,3 +194,11 @@ CELERY_TASK_TRACK_STARTED = True
 
 # Максимальное время на выполнение задачи
 # CELERY_TASK_TIME_LIMIT = 30 * 60
+
+# Настройки для Celery, чтобы использовать периодические задачи
+CELERY_BEAT_SCHEDULE = {
+    'check_users_and_block_inactive': {
+        'task': 'users.tasks.check_users_and_block_inactive',  # Путь к задаче
+        'schedule': timedelta(minutes=60),  # Расписание выполнения задачи (например, каждые 10 минут)
+    },
+}
