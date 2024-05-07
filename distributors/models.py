@@ -1,49 +1,43 @@
 from django.db import models
-
-# Create your models here.
-
-NULLABLE = {
-    'null': True,
-    'blank': True,
-}
+from treenode.models import TreeNodeModel
+from django.utils.translation import gettext_lazy as _
 
 
-class BaseContactInfo(models.Model):
-    name = models.CharField(max_length=255, verbose_name='название')
+class Structure(models.TextChoices):
+    FACTORY = 'завод', _('завод')
+    RETAIL = 'розничная сеть', _('розничная сеть')
+    INDIVIDUAL = 'индивидуальный предприниматель', _('индивидуальный предприниматель')
+
+
+class Supplier(TreeNodeModel):
+    name = models.CharField(max_length=255, verbose_name='название поставщика')
     email = models.EmailField(unique=True, verbose_name='электронная почта')
     country = models.CharField(max_length=255, verbose_name='страна')
     city = models.CharField(max_length=255, verbose_name='город')
     street = models.CharField(max_length=255, verbose_name='улица')
     house_number = models.CharField(max_length=255, verbose_name='номер дома')
+    created_date = models.DateTimeField(auto_now_add=True, verbose_name='дата создания')
+    debt = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='долг', default=0.0)
+    supplier_structure = models.CharField(
+        max_length=255,
+        verbose_name='структура поставщика',
+        choices=Structure.choices,
+        default=Structure.FACTORY
+    )
 
     class Meta:
-        abstract = True
+        verbose_name = 'поставщик'
+        verbose_name_plural = 'поставщики'
 
     def __str__(self):
         return self.name
-
-
-class Supplier(BaseContactInfo):
-    debt = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name='задолженность')
-
-
-class TradeNetwork(BaseContactInfo):
-    LEVEL_CHOICES = (
-        (0, 'завод'),
-        (1, 'розничная сеть'),
-        (2, 'индивидуальный предприниматель'),
-    )
-
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, verbose_name='поставщик')
-    level = models.IntegerField(choices=LEVEL_CHOICES, default=0, verbose_name='уровень сети')
 
 
 class Product(models.Model):
     name = models.CharField(max_length=255, verbose_name='название товара')
     model = models.CharField(max_length=255, verbose_name='модель')
     release_date = models.DateField(verbose_name='дата выхода продукта на рынок')
-    network = models.ForeignKey(TradeNetwork, on_delete=models.CASCADE, verbose_name='торговая сеть')
-    created_date = models.DateTimeField(auto_now_add=True, verbose_name='дата создания', **NULLABLE)
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, verbose_name='поставщик')
 
     class Meta:
         verbose_name = 'товар'
