@@ -25,6 +25,19 @@ class Supplier(TreeNodeModel):
         default=Structure.FACTORY
     )
 
+    tn_parent = models.ForeignKey(
+        'self',
+        on_delete=models.PROTECT,
+        null=True,
+        verbose_name='родительский поставщик',
+        related_name='tn_children'
+    )
+    tn_level = models.PositiveIntegerField(default=0, verbose_name='уровень')
+    tn_order = models.PositiveIntegerField(default=0, verbose_name='порядок')
+
+    class TreeNodeMeta:
+        order_insertion_by = ['name']
+
     class Meta:
         verbose_name = 'поставщик'
         verbose_name_plural = 'поставщики'
