@@ -3,6 +3,8 @@ from treenode.admin import TreeNodeModelAdmin, TreeNodeForm
 from .models import Supplier, Product
 from django.contrib import admin
 from django.contrib import messages
+from django.urls import reverse
+from django.utils.html import format_html
 
 
 def clear_debt(modeladmin, request, queryset):
@@ -26,7 +28,7 @@ class SupplierAdmin(TreeNodeModelAdmin):
     # treenode_display_mode = TreeNodeModelAdmin.TREENODE_DISPLAY_MODE_BREADCRUMBS
     treenode_display_mode = TreeNodeModelAdmin.TREENODE_DISPLAY_MODE_INDENTATION
 
-    list_display = ('name', 'supplier_structure', 'email', 'tn_parent', 'debt')
+    list_display = ('name', 'supplier_structure', 'email', 'tn_parent', 'debt', 'get_supplier_link')
     list_display_links = ('name',)
     list_filter = ('city',)
 
@@ -34,6 +36,13 @@ class SupplierAdmin(TreeNodeModelAdmin):
     list_per_page = 100
     # ordering = ['tn_parent']
     actions = [clear_debt]
+
+    def get_supplier_link(self, obj):
+        supplier_id = obj.tn_parent.id if obj.tn_parent else obj.id
+        url = reverse("admin:distributors_supplier_change", args=[supplier_id])
+        return format_html('<a href=%s>%s</a>' % (url, obj.tn_parent))
+
+    get_supplier_link.short_description = 'Ссылка на поставщика'
 
 
 @admin.register(Product)
