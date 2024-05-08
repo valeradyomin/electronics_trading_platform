@@ -11,12 +11,14 @@ NULLABLE = {
 
 
 class Structure(models.TextChoices):
+    """Категории поставщика"""
     FACTORY = 'завод', _('завод')
     RETAIL = 'розничная сеть', _('розничная сеть')
     INDIVIDUAL = 'индивидуальный предприниматель', _('индивидуальный предприниматель')
 
 
 class Supplier(TreeNodeModel):
+    """Поставщик"""
     name = models.CharField(max_length=255, verbose_name='название поставщика')
     email = models.EmailField(unique=True, verbose_name='электронная почта')
     country = models.CharField(max_length=255, verbose_name='страна')
@@ -41,7 +43,7 @@ class Supplier(TreeNodeModel):
     )
 
     def clean(self):
-        # Проверка, что завод не может быть дочерним элементом сети
+        """ Проверка, что завод не может быть дочерним элементом сети """
         if self.supplier_structure == Structure.FACTORY and self.tn_parent is not None:
             raise ValidationError('Завод не может быть дочерним элементом сети')
 
@@ -57,6 +59,7 @@ class Supplier(TreeNodeModel):
 
 
 class Product(models.Model):
+    """Товар"""
     name = models.CharField(max_length=255, verbose_name='название товара')
     model = models.CharField(max_length=255, verbose_name='модель')
     release_date = models.DateField(verbose_name='дата выхода продукта на рынок')

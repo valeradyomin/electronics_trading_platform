@@ -5,6 +5,7 @@ from distributors.validators import SupplierStructureValidator, DebtUpdateValida
 
 
 class SupplierSerializer(serializers.ModelSerializer):
+    """ Сериализатор для поставщиков """
     class Meta:
         model = Supplier
         # fields = '__all__'
@@ -13,6 +14,7 @@ class SupplierSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    """ Сериализатор для товаров """
     class Meta:
         model = Product
         fields = '__all__'

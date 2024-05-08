@@ -4,6 +4,7 @@ from users.models import UserRoles
 
 
 class IsActiveEmployee(permissions.BasePermission):
+    """ Права только для активных сотрудников """
     def has_permission(self, request, view):
         accepted_roles = [UserRoles.MEMBER, UserRoles.MODERATOR, UserRoles.ADMINISTRATOR]
         return request.user.is_active and request.user.role in accepted_roles

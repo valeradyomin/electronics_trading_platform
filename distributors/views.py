@@ -11,6 +11,7 @@ from distributors.serializers import SupplierSerializer, ProductSerializer
 
 
 class SupplierViewSet(viewsets.ModelViewSet):
+    """Представление для поставщиков"""
     serializer_class = SupplierSerializer
     queryset = Supplier.objects.all()
     permission_classes = [IsActiveEmployee]
@@ -21,6 +22,7 @@ class SupplierViewSet(viewsets.ModelViewSet):
     ordering_fields = ['country']
 
     def get_queryset(self):
+        """Фильтрация по стране"""
         queryset = Supplier.objects.all()
 
         country = self.request.query_params.get('country', None)
@@ -31,6 +33,7 @@ class SupplierViewSet(viewsets.ModelViewSet):
 
 
 class ProductViewSet(viewsets.ModelViewSet):
+    """Представление для товаров"""
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
     permission_classes = [IsActiveEmployee]

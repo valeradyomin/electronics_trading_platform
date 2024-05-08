@@ -8,6 +8,7 @@ from django.utils.html import format_html
 
 
 def clear_debt(modeladmin, request, queryset):
+    """Очистить задолженность перед поставщиком"""
     for supplier in queryset:
         supplier.debt = 0
         supplier.save()
@@ -18,12 +19,14 @@ clear_debt.short_description = "Очистить задолженность пе
 
 
 class SupplierAdminForm(TreeNodeForm):
+    """Форма для редактирования поставщиков"""
     class Meta:
         model = Supplier
         fields = '__all__'
 
 
 class SupplierAdmin(TreeNodeModelAdmin):
+    """Админка поставщиков"""
     # treenode_display_mode = TreeNodeModelAdmin.TREENODE_DISPLAY_MODE_ACCORDION
     # treenode_display_mode = TreeNodeModelAdmin.TREENODE_DISPLAY_MODE_BREADCRUMBS
     treenode_display_mode = TreeNodeModelAdmin.TREENODE_DISPLAY_MODE_INDENTATION
@@ -38,6 +41,7 @@ class SupplierAdmin(TreeNodeModelAdmin):
     actions = [clear_debt]
 
     def get_supplier_link(self, obj):
+        """Ссылка на поставщика"""
         supplier_id = obj.tn_parent.id if obj.tn_parent else obj.id
         url = reverse("admin:distributors_supplier_change", args=[supplier_id])
         return format_html('<a href=%s>%s</a>' % (url, obj.tn_parent))
@@ -47,6 +51,7 @@ class SupplierAdmin(TreeNodeModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    """Админка продуктов"""
     list_display = ('name', 'model', 'release_date', 'supplier')
 
 
