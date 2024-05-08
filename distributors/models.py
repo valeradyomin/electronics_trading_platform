@@ -45,12 +45,6 @@ class Supplier(TreeNodeModel):
         if self.supplier_structure == Structure.FACTORY and self.tn_parent is not None:
             raise ValidationError('Завод не может быть дочерним элементом сети')
 
-        # Проверка, что каждое звено сети ссылается только на одного поставщика оборудования
-        if self.tn_parent is not None:
-            siblings = Supplier.objects.filter(tn_parent=self.tn_parent)
-            if siblings.exists():
-                raise ValidationError("Каждое звено сети должно ссылаться только на одного поставщика оборудования.")
-
     class TreeNodeMeta:
         order_insertion_by = ['name']
 
