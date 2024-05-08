@@ -5,7 +5,7 @@ from .models import Supplier, Product
 
 
 class SupplierAdmin(TreeNodeModelAdmin):
-    list_display = ('supplier_structure', 'name',)
+    list_display = ('supplier_structure', 'name', 'email', 'tn_parent')
 
 
 @admin.register(Product)

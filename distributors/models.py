@@ -1,6 +1,13 @@
 from django.db import models
 from treenode.models import TreeNodeModel
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
+
+
+NULLABLE = {
+    'null': True,
+    'blank': True,
+}
 
 
 class Structure(models.TextChoices):
@@ -20,7 +27,7 @@ class Supplier(TreeNodeModel):
     debt = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='долг', default=0.0)
     supplier_structure = models.CharField(
         max_length=255,
-        verbose_name='структура поставщика',
+        verbose_name='категория поставщика',
         choices=Structure.choices,
         default=Structure.FACTORY
     )
@@ -28,12 +35,21 @@ class Supplier(TreeNodeModel):
     tn_parent = models.ForeignKey(
         'self',
         on_delete=models.PROTECT,
-        null=True,
         verbose_name='родительский поставщик',
-        related_name='tn_children'
+        related_name='tn_children',
+        **NULLABLE
     )
-    tn_level = models.PositiveIntegerField(default=0, verbose_name='уровень')
-    tn_order = models.PositiveIntegerField(default=0, verbose_name='порядок')
+
+    def clean(self):
+        # Проверка, что завод не может быть дочерним элементом сети
+        if self.supplier_structure == Structure.FACTORY and self.tn_parent is not None:
+            raise ValidationError('Завод не может быть дочерним элементом сети')
+
+        # Проверка, что каждое звено сети ссылается только на одного поставщика оборудования
+        if self.tn_parent is not None:
+            siblings = Supplier.objects.filter(tn_parent=self.tn_parent)
+            if siblings.exists():
+                raise ValidationError("Каждое звено сети должно ссылаться только на одного поставщика оборудования.")
 
     class TreeNodeMeta:
         order_insertion_by = ['name']
